@@ -1,0 +1,90 @@
+/* 顶部工具条 */
+.add-controls {
+    position: fixed;
+    top: 60px;
+    left: 30px;
+    z-index: 100000;
+}
+
+.add-toolbar {
+    display: inline-flex;
+    gap: 8px;
+}
+
+.btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, .08);
+}
+
+.btn.primary {
+    background: #1e6bd6;
+    color: #fff;
+    border-color: #1e6bd6;
+}
+
+.btn.secondary {
+    background: #f3f4f6;
+}
+
+.btn:disabled {
+    opacity: .6;
+    cursor: not-allowed;
+}
+
+/* 弹窗 */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100001;
+}
+
+.modal {
+    width: 520px;
+    max-width: calc(100vw - 32px);
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .2);
+    padding: 16px;
+}
+
+.modal h3 {
+    margin: 0 0 12px;
+}
+
+.form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.form-row label {
+    font-size: 12px;
+    color: #333;
+}
+
+.form-row input,
+.form-row textarea,
+.form-row select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 14px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 8px;
+}

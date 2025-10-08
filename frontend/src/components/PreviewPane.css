@@ -1,0 +1,31 @@
+.preview-pane {
+  position: fixed;
+  top: 56px; /* below sticky header */
+  right: 16px;
+  width: 380px;
+  height: calc(100vh - 64px);
+  background: #fff;
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.ppane-header { padding: 8px; border-bottom: 1px solid #eee; background: #fafafa; }
+.ppane-actions { display: flex; gap: 8px; justify-content: flex-start; }
+.ppane-btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #1c1c1c; background: #1c1c1c; color: #fff; cursor: pointer; }
+.ppane-btn--ghost { background: #fff; color: #1c1c1c; }
+
+.ppane-body { flex: 1; display: grid; grid-template-rows: 240px 1fr; min-height: 0; }
+.ppane-media { background: #fff; display: block; height: 240px; overflow: hidden; }
+.ppane-media-img { display: block; width: 100%; height: 100%; object-fit: cover; background: transparent; }
+.ppane-media-fallback { width: 100%; height: 240px; display:flex; align-items:center; justify-content:center; background: #f4f4f5; color: #8b95a1; }
+
+.ppane-content { padding: 12px; overflow: auto; min-height: 0; text-align: left; }
+.ppane-title { margin: 0 0 8px; font-size: 18px; }
+.ppane-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.ppane-chip { display: inline-flex; align-items: center; padding: 2px 6px; border: 1px solid #d1d5db; border-radius: 999px; font-size: 12px; font-weight: 600; background: #fff; }
+.ppane-chip--period { color: #fff; border: none; }
+.ppane-desc { margin: 0; line-height: 1.6; color: #333; white-space: pre-wrap; }
