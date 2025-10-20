@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { ArtPeriod, Artwork } from '../types/timeline';
+import { markdownToHtml } from '../utils/markdown';
 
 type DetailState =
   | { type: 'artwork'; artwork: Artwork; period?: ArtPeriod }
@@ -14,18 +15,121 @@ interface Props {
   onUpdateArtwork?: (a: Artwork) => void;
   onUpdatePeriod?: (p: ArtPeriod) => void;
   onDeleteArtwork?: (id: string) => void;
+  startInEdit?: boolean;
+  onStartEditConsumed?: () => void;
 }
 
-const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpdateArtwork, onUpdatePeriod, onDeleteArtwork }) => {
+const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpdateArtwork, onUpdatePeriod, onDeleteArtwork, startInEdit, onStartEditConsumed }) => {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ea, setEa] = useState<Artwork | null>(null);
   const [ep, setEp] = useState<ArtPeriod | null>(null);
   const [uploadingA, setUploadingA] = useState(false);
   const [uploadingP, setUploadingP] = useState(false);
-  const fileInputA = React.useRef<HTMLInputElement | null>(null);
-  const fileInputP = React.useRef<HTMLInputElement | null>(null);
+  const fileInputA = useRef<HTMLInputElement | null>(null);
+  const fileInputP = useRef<HTMLInputElement | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const artworkDescRef = useRef<HTMLTextAreaElement | null>(null);
+  const periodDescRef = useRef<HTMLTextAreaElement | null>(null);
+
+  type FormatAction = 'bold' | 'italic' | 'ul' | 'ol' | 'quote';
+
+  const applyFormatting = (target: 'artwork' | 'period', action: FormatAction) => {
+    const textarea = target === 'artwork' ? artworkDescRef.current : periodDescRef.current;
+    const draft = target === 'artwork' ? ea : ep;
+    if (!textarea || !draft) return;
+
+    const value = draft.description || '';
+    const start = textarea.selectionStart ?? 0;
+    const end = textarea.selectionEnd ?? 0;
+    const selected = value.slice(start, end);
+    let replacement = selected;
+    let nextStart = start;
+    let nextEnd = end;
+
+    const withFallback = (text: string, fallback: string) => (text ? text : fallback);
+
+    switch (action) {
+      case 'bold': {
+        const content = withFallback(selected, '加粗文本');
+        replacement = `**${content}**`;
+        nextStart = start + 2;
+        nextEnd = nextStart + content.length;
+        break;
+      }
+      case 'italic': {
+        const content = withFallback(selected, '斜体文本');
+        replacement = `_${content}_`;
+        nextStart = start + 1;
+        nextEnd = nextStart + content.length;
+        break;
+      }
+      case 'ul': {
+        const lines = withFallback(selected, '列表项').split('\n');
+        const formatted = lines
+          .map(line => {
+            const trimmed = line.trim();
+            const clean = trimmed.replace(/^[-*+]\s+/, '');
+            return `- ${clean || '列表项'}`;
+          })
+          .join('\n');
+        replacement = formatted;
+        nextStart = start;
+        nextEnd = start + formatted.length;
+        break;
+      }
+      case 'ol': {
+        const lines = withFallback(selected, '列表项').split('\n');
+        const formatted = lines
+          .map((line, index) => {
+            const trimmed = line.trim();
+            const clean = trimmed.replace(/^\d+\.\s+/, '');
+            return `${index + 1}. ${clean || '列表项'}`;
+          })
+          .join('\n');
+        replacement = formatted;
+        nextStart = start;
+        nextEnd = start + formatted.length;
+        break;
+      }
+      case 'quote': {
+        const lines = withFallback(selected, '引用内容').split('\n');
+        const formatted = lines.map(line => `> ${line.trim() || '引用内容'}`).join('\n');
+        replacement = formatted;
+        nextStart = start;
+        nextEnd = start + formatted.length;
+        break;
+      }
+      default:
+        break;
+    }
+
+    const isBlock = action === 'ul' || action === 'ol' || action === 'quote';
+    let newValue: string;
+
+    if (isBlock) {
+  const needsLeadingNewline = start > 0 && value[start - 1] !== '\n';
+  const needsTrailingNewline = end < value.length && value[end] !== '\n';
+      const prefix = needsLeadingNewline ? '\n' : '';
+      const suffix = needsTrailingNewline ? '\n' : '';
+      newValue = value.slice(0, start) + prefix + replacement + suffix + value.slice(end);
+      nextStart = start + prefix.length;
+      nextEnd = nextStart + replacement.length;
+    } else {
+      newValue = value.slice(0, start) + replacement + value.slice(end);
+    }
+
+    if (target === 'artwork' && ea) {
+      setEa({ ...ea, description: newValue });
+    } else if (target === 'period' && ep) {
+      setEp({ ...ep, description: newValue });
+    }
+
+    requestAnimationFrame(() => {
+      textarea.focus();
+      textarea.setSelectionRange(nextStart, nextEnd);
+    });
+  };
   const handleDelete = async () => {
     if (!ea) return;
     const ok = window.confirm('确定要删除该画作吗？');
@@ -56,13 +160,24 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
   }, [open, onClose]);
 
   useEffect(() => {
-    setEditing(false);
+    if (!open) {
+      setEditing(false);
+      return;
+    }
     setBusy(false);
     if (detail?.type === 'artwork') setEa(detail.artwork);
     else setEa(null);
     if (detail?.type === 'period') setEp(detail.period);
     else setEp(null);
+    setEditing(false);
   }, [detail, open]);
+
+  useEffect(() => {
+    if (open && startInEdit) {
+      setEditing(true);
+      onStartEditConsumed?.();
+    }
+  }, [open, startInEdit, onStartEditConsumed]);
 
   if (!open || !detail) return null;
 
@@ -164,7 +279,25 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
               </div>
               <div className="form-row">
                 <label>描述</label>
-                <textarea rows={3} value={a.description} onChange={e => setEa({ ...(a as Artwork), description: e.target.value })} />
+                <div className="markdown-editor">
+                  <div className="markdown-toolbar">
+                    <button type="button" onClick={() => applyFormatting('artwork', 'bold')} title="加粗">
+                      <span style={{ fontWeight: 700 }}>B</span>
+                    </button>
+                    <button type="button" onClick={() => applyFormatting('artwork', 'italic')} title="斜体">
+                      <span style={{ fontStyle: 'italic' }}>I</span>
+                    </button>
+                    <button type="button" onClick={() => applyFormatting('artwork', 'ul')} title="无序列表">•</button>
+                    <button type="button" onClick={() => applyFormatting('artwork', 'ol')} title="有序列表">1.</button>
+                    <button type="button" onClick={() => applyFormatting('artwork', 'quote')} title="引用">“</button>
+                  </div>
+                  <textarea
+                    ref={artworkDescRef}
+                    className="markdown-editor__textarea markdown-editor__textarea--artwork"
+                    value={a.description || ''}
+                    onChange={e => setEa({ ...(a as Artwork), description: e.target.value })}
+                  />
+                </div>
               </div>
             </>
           ) : (
@@ -180,7 +313,7 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
                 )}
               </div>
               {a.description && (
-                <p className="detail-desc">{a.description}</p>
+                <div className="detail-desc" dangerouslySetInnerHTML={{ __html: markdownToHtml(a.description) }} />
               )}
             </>
           )}
@@ -272,7 +405,25 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
             </div>
             <div className="form-row">
               <label>描述</label>
-              <textarea rows={3} value={p.description} onChange={e => setEp({ ...(p as ArtPeriod), description: e.target.value })} />
+              <div className="markdown-editor">
+                <div className="markdown-toolbar">
+                  <button type="button" onClick={() => applyFormatting('period', 'bold')} title="加粗">
+                    <span style={{ fontWeight: 700 }}>B</span>
+                  </button>
+                  <button type="button" onClick={() => applyFormatting('period', 'italic')} title="斜体">
+                    <span style={{ fontStyle: 'italic' }}>I</span>
+                  </button>
+                  <button type="button" onClick={() => applyFormatting('period', 'ul')} title="无序列表">•</button>
+                  <button type="button" onClick={() => applyFormatting('period', 'ol')} title="有序列表">1.</button>
+                  <button type="button" onClick={() => applyFormatting('period', 'quote')} title="引用">“</button>
+                </div>
+                <textarea
+                  ref={periodDescRef}
+                  className="markdown-editor__textarea"
+                  value={p.description || ''}
+                  onChange={e => setEp({ ...(p as ArtPeriod), description: e.target.value })}
+                />
+              </div>
             </div>
           </>
         ) : (
@@ -284,7 +435,7 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
               </span>
             </div>
             {p.description && (
-              <p className="detail-desc">{p.description}</p>
+              <div className="detail-desc" dangerouslySetInnerHTML={{ __html: markdownToHtml(p.description) }} />
             )}
           </>
         )}

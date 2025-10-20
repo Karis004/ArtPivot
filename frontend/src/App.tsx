@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import './App.css';
 
 import VerticalTimeline from './components/VerticalTimeline';
@@ -17,6 +17,8 @@ function App() {
   const [detail, setDetail] = useState<DetailState | undefined>(undefined);
   const [previewMode, setPreviewMode] = useState<'side-pane' | 'modal'>('side-pane');
   const [loading, setLoading] = useState(true);
+  const [modalEntryMode, setModalEntryMode] = useState<'view' | 'edit'>('view');
+  const consumeModalEntryMode = useCallback(() => setModalEntryMode('view'), [setModalEntryMode]);
 
   // 仅为提供 formatYear 给弹窗使用（避免重复逻辑）
   const { formatYear } = useTimelinePosition(periods, artworks);
@@ -82,6 +84,11 @@ function App() {
             formatYear={formatYear}
             onClose={() => setDetail(undefined)}
             onSwitchToModal={() => {
+              setModalEntryMode('view');
+              setPreviewMode('modal');
+            }}
+            onEdit={() => {
+              setModalEntryMode('edit');
               setPreviewMode('modal');
             }}
           />
@@ -89,7 +96,7 @@ function App() {
         <DetailModal
           open={!!detail && previewMode === 'modal'}
           detail={detail}
-          onClose={() => { setDetail(undefined); setPreviewMode('side-pane'); }}
+          onClose={() => { setDetail(undefined); setPreviewMode('side-pane'); consumeModalEntryMode(); }}
           formatYear={formatYear}
           onUpdateArtwork={(a) => {
             (async () => {
@@ -105,6 +112,8 @@ function App() {
             })();
             setDetail(d => d && d.type === 'period' ? { ...d, period: p } : d);
           }}
+          startInEdit={modalEntryMode === 'edit'}
+          onStartEditConsumed={consumeModalEntryMode}
           onDeleteArtwork={(id) => {
             (async () => {
               await axios.delete(`/api/artworks/${id}`);
@@ -112,6 +121,7 @@ function App() {
             })();
             setDetail(undefined);
             setPreviewMode('side-pane');
+            consumeModalEntryMode();
           }}
         />
       </main>

@@ -1,6 +1,7 @@
 import React from 'react';
 import './PreviewPane.css';
 import { ArtPeriod, Artwork } from '../types/timeline';
+import { markdownToHtml } from '../utils/markdown';
 
 export type PreviewDetail =
   | { type: 'artwork'; artwork: Artwork; period?: ArtPeriod }
@@ -12,9 +13,10 @@ interface Props {
   formatYear: (year: number) => string;
   onClose: () => void;
   onSwitchToModal: () => void;
+  onEdit: () => void;
 }
 
-const PreviewPane: React.FC<Props> = ({ open, detail, formatYear, onClose, onSwitchToModal }) => {
+const PreviewPane: React.FC<Props> = ({ open, detail, formatYear, onClose, onSwitchToModal, onEdit }) => {
   if (!open || !detail) return null;
 
   const renderArtwork = (art: Artwork, period?: ArtPeriod) => (
@@ -35,7 +37,9 @@ const PreviewPane: React.FC<Props> = ({ open, detail, formatYear, onClose, onSwi
             <span className="ppane-chip ppane-chip--period" style={{ background: period.color }}>{period.name}</span>
           )}
         </div>
-        {art.description && <p className="ppane-desc">{art.description}</p>}
+        {art.description && (
+          <div className="ppane-desc" dangerouslySetInnerHTML={{ __html: markdownToHtml(art.description) }} />
+        )}
       </div>
     </div>
   );
@@ -54,7 +58,9 @@ const PreviewPane: React.FC<Props> = ({ open, detail, formatYear, onClose, onSwi
         <div className="ppane-meta">
           <span className="ppane-chip">{formatYear(p.startYear)} - {formatYear(p.endYear)}</span>
         </div>
-        {p.description && <p className="ppane-desc">{p.description}</p>}
+        {p.description && (
+          <div className="ppane-desc" dangerouslySetInnerHTML={{ __html: markdownToHtml(p.description) }} />
+        )}
       </div>
     </div>
   );
@@ -63,6 +69,7 @@ const PreviewPane: React.FC<Props> = ({ open, detail, formatYear, onClose, onSwi
     <aside className="preview-pane" aria-label="预览面板" style={{ transform: 'translateX(0)', transition: 'transform 200ms ease, opacity 200ms ease', opacity: 1 }}>
       <div className="ppane-header">
         <div className="ppane-actions">
+          <button className="ppane-btn ppane-btn--ghost" onClick={onEdit} title="编辑并在弹窗中打开">编辑</button>
           <button className="ppane-btn" onClick={onSwitchToModal} title="切换为弹窗显示">弹窗显示</button>
           <button className="ppane-btn ppane-btn--ghost" onClick={onClose} title="清除选择">关闭</button>
         </div>

@@ -14,9 +14,11 @@
 }
 
 .ppane-header { padding: 8px; border-bottom: 1px solid #eee; background: #fafafa; }
-.ppane-actions { display: flex; gap: 8px; justify-content: flex-start; }
+.ppane-actions { display: flex; gap: 8px; justify-content: flex-start; flex-wrap: wrap; }
 .ppane-btn { padding: 6px 10px; border-radius: 6px; border: 1px solid #1c1c1c; background: #1c1c1c; color: #fff; cursor: pointer; }
 .ppane-btn--ghost { background: #fff; color: #1c1c1c; }
+.ppane-btn:hover { opacity: 0.92; }
+.ppane-btn:active { transform: translateY(1px); }
 
 .ppane-body { flex: 1; display: grid; grid-template-rows: 240px 1fr; min-height: 0; }
 .ppane-media { background: #fff; display: block; height: 240px; overflow: hidden; }
@@ -28,4 +30,14 @@
 .ppane-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .ppane-chip { display: inline-flex; align-items: center; padding: 2px 6px; border: 1px solid #d1d5db; border-radius: 999px; font-size: 12px; font-weight: 600; background: #fff; }
 .ppane-chip--period { color: #fff; border: none; }
-.ppane-desc { margin: 0; line-height: 1.6; color: #333; white-space: pre-wrap; }
+.ppane-desc { margin: 0; line-height: 1.6; color: #333; text-align: left; }
+.ppane-desc p { margin: 0 0 0.75rem; }
+.ppane-desc p:last-child { margin-bottom: 0; }
+.ppane-desc ul,
+.ppane-desc ol { margin: 0 0 0.75rem 1.25rem; padding-left: 1.25rem; }
+.ppane-desc li { margin-bottom: 0.4rem; }
+.ppane-desc li:last-child { margin-bottom: 0; }
+.ppane-desc code { background: #f3f4f6; padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.ppane-desc pre { background: #f3f4f6; padding: 12px; border-radius: 8px; overflow: auto; margin: 0 0 0.75rem; }
+.ppane-desc pre code { background: none; padding: 0; font-size: 0.95em; display: block; white-space: pre; }
+.ppane-desc img { max-width: 100%; height: auto; border-radius: 8px; margin: 0 0 0.75rem; }

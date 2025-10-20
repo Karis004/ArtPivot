@@ -213,7 +213,7 @@
 }
 
 /* 悬浮分组时，提升整个分组的堆叠上下文，盖过相邻分组 */
-.artwork-bucket:hover { z-index: 999997; }
+.artwork-bucket:hover { z-index: 10; }
 
 .artwork-bucket-row {
     display: flex; /* 保持横向排列 */
@@ -238,13 +238,13 @@
 
 .artwork-card-inline:hover {
     transform: translateY(-6px) scale(1.04);
-    z-index: 999999; /* 浮到最上层，确保高于其它元素 */
+    z-index: 10; /* 浮到最上层，确保高于其它元素 */
 }
 
 .artwork-card-inline:hover .artwork-content {
     box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18);
     position: relative;
-    z-index: 1000000;
+    z-index: 10;
 }
 
 .artwork-card-inline {
@@ -266,7 +266,7 @@
 
 /* 统一 hover 行为（堆叠与非堆叠一致）：上浮+轻微放大+最高层级 */
 .artwork-card-inline { position: relative; transition: transform 0.22s ease, z-index 0s; }
-.artwork-card-inline:hover { transform: translateY(-6px) scale(1.04); z-index: 999999; }
+.artwork-card-inline:hover { transform: translateY(-6px) scale(1.04); z-index: 10; }
 .artwork-card-inline:hover .artwork-content { box-shadow: 0 10px 28px rgba(0, 0, 0, 0.18); }
 
 .artwork-card-inline .artwork-content img,
@@ -361,7 +361,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 20000000; /* 高于任何卡片 hover 层级 */
+    z-index: 12; /* 高于任何卡片 hover 层级 */
 }
 
 .detail-modal {
@@ -406,4 +406,23 @@
 .detail-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .meta-chip { display: inline-flex; align-items: center; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 999px; font-size: 12px; font-weight: 600; background: #fff; }
 .meta-chip--period { color: #fff; border: none; }
-.detail-desc { margin: 0; line-height: 1.6; color: #333; }
+.detail-desc { margin: 0; line-height: 1.6; color: #333; text-align: left; }
+.detail-desc p { margin: 0 0 0.75rem; }
+.detail-desc p:last-child { margin-bottom: 0; }
+.detail-desc ul,
+.detail-desc ol { margin: 0 0 0.75rem 1.25rem; padding-left: 1.25rem; }
+.detail-desc li { margin-bottom: 0.4rem; }
+.detail-desc li:last-child { margin-bottom: 0; }
+.detail-desc code { background: #f3f4f6; padding: 0 4px; border-radius: 4px; font-size: 0.9em; }
+.detail-desc pre { background: #f3f4f6; padding: 12px; border-radius: 8px; overflow: auto; margin: 0 0 0.75rem; }
+.detail-desc pre code { background: none; padding: 0; font-size: 0.95em; display: block; white-space: pre; }
+.detail-desc img { max-width: 100%; height: auto; border-radius: 8px; margin: 0 0 0.75rem; }
+
+.markdown-editor__textarea { max-height: 360px; resize: vertical; font-family: inherit; }
+.markdown-editor__textarea--artwork { min-height: 140px; }
+
+.markdown-editor { display: flex; flex-direction: column; gap: 6px; }
+.markdown-toolbar { display: flex; gap: 6px; flex-wrap: wrap; }
+.markdown-toolbar button { cursor: pointer; border: 1px solid #d1d5db; background: #f9fafb; border-radius: 4px; padding: 4px 8px; font-size: 13px; line-height: 1; }
+.markdown-toolbar button:hover { background: #eef2ff; border-color: #c7d2fe; }
+.markdown-toolbar button:active { background: #e0e7ff; }
