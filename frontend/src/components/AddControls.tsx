@@ -128,8 +128,14 @@ const AiImportModal: React.FC<{
     setLoading(true); setError(undefined);
     try {
       const apiKey = localStorage.getItem('ai.apiKey') || '';
+      const model = localStorage.getItem('ai.model') || '';
+      const baseUrl = localStorage.getItem('ai.baseUrl') || '';
+      
       const payload: any = { text: docText, filename: file?.name || undefined };
       if (apiKey) payload.apiKey = apiKey; // 无 key 时，后端会优先本地解析 IMAGES
+      if (model) payload.model = model;
+      if (baseUrl) payload.baseUrl = baseUrl;
+      
       const res = await axios.post('/api/ai/extract', payload);
       if (!res.data?.ok) {
         setError(res.data?.error || 'AI 提取失败');

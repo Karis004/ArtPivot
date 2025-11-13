@@ -91,15 +91,53 @@ app.post('/api/send-data', (req: Request, res: Response) => {
 
 app.post('/api/ai/test', async (req: Request, res: Response) => {
   try {
-    const { apiKey } = (req.body || {}) as { apiKey?: string };
-    if (!apiKey || typeof apiKey !== 'string') {
-      return res.status(400).json({ ok: false, error: '缺少 apiKey' });
+    const { apiKey, model, baseUrl } = req.body || {};
+    
+    if (!apiKey) {
+      return res.status(400).json({ ok: false, error: '缺少 API Key' });
     }
-    const isLikelyValid = apiKey.trim().length > 20;
-    return res.json({ ok: isLikelyValid, message: isLikelyValid ? 'API Key 形式看起来有效' : 'API Key 可能无效' });
-  } catch (e) {
-    console.error(e);
-    return res.status(500).json({ ok: false, error: '服务器错误' });
+
+    // 直接使用用户提供的完整URL,不做任何拼接
+    const url = baseUrl || 'https://api.openai.com/v1/chat/completions';
+    const testModel = model || 'gpt-4o-mini';
+
+    console.log('[AI Test] URL:', url);
+    console.log('[AI Test] Model:', testModel);
+
+    // 构建请求体
+    const requestBody: any = {
+      model: testModel,
+      messages: [{ role: 'user', content: 'test' }],
+      max_tokens: 5,
+    };
+
+    // ModelScope 非流式调用需要禁用 thinking（直接放在顶层）
+    if (url.includes('modelscope.cn')) {
+      requestBody.enable_thinking = false;
+    }
+
+    console.log('[AI Test] Request Body:', JSON.stringify(requestBody, null, 2));
+
+    const testResp = await axios.post(
+      url,
+      requestBody,
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${apiKey}`,
+        },
+        timeout: 15000,
+      }
+    );
+
+    return res.json({ ok: true, message: 'API Key 验证成功!' });
+  } catch (apiError: any) {
+    console.error('[AI Test] 失败:', apiError?.response?.data || apiError.message);
+    const errMsg = apiError?.response?.data?.error?.message || apiError.message || '未知错误';
+    return res.status(400).json({ 
+      ok: false, 
+      error: `API 验证失败: ${errMsg}` 
+    });
   }
 });
 
@@ -296,11 +334,16 @@ app.post('/api/ai/extract', async (req: Request, res: Response) => {
       }
     }
 
-    if (!apiKey) return res.status(400).json({ ok: false, error: '缺少 apiKey（AI 回退需要）' });
-    const endpoint = (baseUrl || 'https://api.openai.com/v1') + '/chat/completions';
+    if (!apiKey) return res.status(400).json({ ok: false, error: '缺少 API Key' });
+    
+    // 直接使用用户提供的完整URL
+    const url = baseUrl || 'https://api.openai.com/v1/chat/completions';
     const usedModel = model || 'gpt-4o-mini';
 
-    const systemPrompt = `你是一名信息抽取助手。只需要从文档中的“IMAGES:”段落提取艺术作品信息，并严格输出以下 JSON（不要包含多余文字，也不要输出 periods）：
+    console.log('[AI Extract] URL:', url);
+    console.log('[AI Extract] Model:', usedModel);
+
+    const systemPrompt = `你是一名信息抽取助手。只需要从文档中的“IMAGE LIST”后提取艺术作品信息，并严格输出以下 JSON（不要包含多余文字，也不要输出 periods）：
 {
   "artworks": [
     {
@@ -313,23 +356,38 @@ app.post('/api/ai/extract', async (req: Request, res: Response) => {
   ]
 }
 规则：
-- 仅解析“IMAGES:”段落中的编号条目；忽略其他段落。
+- 仅解析“IMAGE LIST”后的编号条目；忽略其他段落。
+- content format: [number, author, title of the work, material, year]
 - 年份规范：B.C. 为负数，A.D. 为正数；区间取中值；如“1st c. A.D.”取 50；“16th c. B.C.”取 -1550；带 c. 视为约数即可。
 - 如果标题或作者缺失，则跳过该作品。`;
 
     const userPrompt = `文档内容如下（UTF-8 文本）：\n\n${text}`;
 
+    // 构建请求体
+    const requestBody: any = {
+      model: usedModel,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
+      temperature: 0.2,
+    };
+
+    // OpenAI 格式支持 response_format，但 ModelScope 可能不支持
+    if (!url.includes('modelscope.cn')) {
+      requestBody.response_format = { type: 'json_object' };
+    }
+
+    // ModelScope 非流式调用需要禁用 thinking（直接放在顶层）
+    if (url.includes('modelscope.cn')) {
+      requestBody.enable_thinking = false;
+    }
+
+    console.log('[AI Extract] Request Body keys:', Object.keys(requestBody));
+
     const resp = await axios.post(
-      endpoint,
-      {
-        model: usedModel,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.2,
-        response_format: { type: 'json_object' },
-      },
+      url,
+      requestBody,
       {
         headers: {
           'Content-Type': 'application/json',

@@ -52,7 +52,7 @@ function App() {
         </div>
       </header>
 
-      <main style={{ position: 'relative', paddingRight: previewMode === 'side-pane' && !!detail ? 412 : 16, transition: 'padding-right 220ms ease' }}>
+      <main style={{ position: 'relative', paddingRight: previewMode === 'side-pane' && !!detail ? 412 : 0, transition: 'padding-right 220ms ease' }}>
         {loading && <div style={{ padding: 12, color: '#666' }}>加载中…</div>}
         <AddControls
           periods={periods}

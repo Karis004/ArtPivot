@@ -5,11 +5,15 @@ import './AiSettings.css';
 
 const LS_KEY = 'ai.apiKey';
 const LS_NAME = 'ai.apiName';
+const LS_MODEL = 'ai.model';
+const LS_BASE_URL = 'ai.baseUrl';
 
 const AiSettings: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [apiName, setApiName] = useState('');
+  const [model, setModel] = useState('');
+  const [baseUrl, setBaseUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [testMsg, setTestMsg] = useState<string | undefined>(undefined);
   const [testing, setTesting] = useState(false);
@@ -23,6 +27,10 @@ const AiSettings: React.FC = () => {
     setApiKey(saved);
     const savedName = localStorage.getItem(LS_NAME) || '';
     setApiName(savedName);
+    const savedModel = localStorage.getItem(LS_MODEL) || '';
+    setModel(savedModel);
+    const savedBaseUrl = localStorage.getItem(LS_BASE_URL) || '';
+    setBaseUrl(savedBaseUrl);
   }, []);
 
   // 名称用于展示，Key 不再显示明文或掩码
@@ -33,6 +41,8 @@ const AiSettings: React.FC = () => {
     try {
       localStorage.setItem(LS_KEY, apiKey.trim());
       localStorage.setItem(LS_NAME, apiName.trim());
+      localStorage.setItem(LS_MODEL, model.trim());
+      localStorage.setItem(LS_BASE_URL, baseUrl.trim());
       setTestMsg('已保存到本地浏览器');
     } catch (e) {
       setError('保存失败：浏览器不支持或存储受限');
@@ -46,7 +56,11 @@ const AiSettings: React.FC = () => {
     setTestMsg(undefined);
     setError(undefined);
     try {
-      const res = await axios.post('/api/ai/test', { apiKey: apiKey.trim() });
+      const payload: any = { apiKey: apiKey.trim() };
+      if (model.trim()) payload.model = model.trim();
+      if (baseUrl.trim()) payload.baseUrl = baseUrl.trim();
+      
+      const res = await axios.post('/api/ai/test', payload);
       if (res.data?.ok) setTestMsg(res.data?.message || '测试通过');
       else setError(res.data?.message || res.data?.error || '测试失败');
     } catch (e: any) {
@@ -107,7 +121,31 @@ const AiSettings: React.FC = () => {
               />
             </div>
             <div className="form-row">
-              <label>API Key</label>
+              <label>Base URL（完整API端点）</label>
+              <input
+                value={baseUrl}
+                onChange={e => setBaseUrl(e.target.value)}
+                placeholder="https://api.openai.com/v1/chat/completions"
+              />
+              <small style={{ color: '#6b7280', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                填写完整的 API 端点 URL（包含 /chat/completions）<br/>
+                OpenAI: https://api.openai.com/v1/chat/completions<br/>
+                ModelScope: https://api-inference.modelscope.cn/v1/chat/completions
+              </small>
+            </div>
+            <div className="form-row">
+              <label>Model Name（模型名称）</label>
+              <input
+                value={model}
+                onChange={e => setModel(e.target.value)}
+                placeholder="gpt-4o-mini"
+              />
+              <small style={{ color: '#6b7280', fontSize: '11px', marginTop: '4px', display: 'block' }}>
+                填写模型名称，留空使用 gpt-4o-mini
+              </small>
+            </div>
+            <div className="form-row">
+              <label>API Key (Token)</label>
               <input
                 type="password"
                 value={apiKey}
