@@ -103,11 +103,10 @@
 .ppane-chip {
   display: inline-flex;
   align-items: center;
-  padding: 2px 6px;
-  border: 1px solid #d1d5db;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: 0px 8px 0 0;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: italic;
   background: #fff;
 }
 
