@@ -14,10 +14,8 @@ const ArtworkCard: React.FC<Props> = ({ artwork, period, formatYear, onClick }) 
 
   return (
     <div className="artwork-content" role="button" onClick={() => onClick?.(artwork, period)}>
-      {/* 背景板（带模糊） */}
       <div className="artwork-hover-backdrop"></div>
       
-      {/* 图片 */}
       <div className="artwork-image-wrapper">
         {hasImage ? (
           <img

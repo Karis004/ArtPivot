@@ -138,7 +138,6 @@ const ArtworkBucketRow: React.FC<RowProps> = ({ artworks, periods, formatYear, o
           <div
             key={`artwork-card-${art.id}`}
             className={"artwork-card-inline is-stacked"}
-            title={`${formatYear(art.year)}`}
             style={{ left: `${left}px`, top: 0, position: 'absolute' }}
           >
             <div className={selectedArtworkId === art.id ? 'is-selected' : undefined}>
