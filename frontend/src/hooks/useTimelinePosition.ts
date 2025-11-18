@@ -22,7 +22,7 @@ export const useTimelinePosition = (periods: ArtPeriod[], artworks: Artwork[]): 
     const rawTotalYears = rawMaxYear - rawMinYear;
     
     // 计算缓冲区域（上下各8%）
-    const bufferYears = Math.round(rawTotalYears * 0.08);
+    const bufferYears = Math.round(rawTotalYears * 0.02);
     const minYear = rawMinYear - bufferYears;
     const maxYear = rawMaxYear + bufferYears;
     const totalYears = maxYear - minYear;

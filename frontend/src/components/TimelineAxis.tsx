@@ -25,14 +25,25 @@ const TimelineAxis: React.FC<Props> = ({ periods, artworks, yearToPercent, forma
     return ticks;
   }, [minYear, maxYear]);
 
-  const periodPoints = useMemo(
-    () =>
-      periods.flatMap(period => [
-        { id: `period-start-${period.id}`, year: period.startYear, type: 'period-start' as const, label: `${period.name} 开始` },
-        { id: `period-end-${period.id}`, year: period.endYear, type: 'period-end' as const, label: `${period.name} 结束` }
-      ]),
-    [periods]
-  );
+  const periodPoints = useMemo(() => {
+    // 先把所有时期的开始/结束点铺平
+    const rawPoints = periods.flatMap(period => [
+      { id: `period-start-${period.id}`, year: period.startYear, type: 'period-start' as const, label: `${period.name} 开始` },
+      { id: `period-end-${period.id}`, year: period.endYear, type: 'period-end' as const, label: `${period.name} 结束` }
+    ]);
+
+    // 如果同一年有多个点（比如多个时期同一年开始/结束），只保留一个，避免视觉上完全重叠
+    const seenYears = new Set<number>();
+    const deduped: typeof rawPoints = [];
+    for (const p of rawPoints) {
+      if (!seenYears.has(p.year)) {
+        seenYears.add(p.year);
+        deduped.push(p);
+      }
+    }
+
+    return deduped;
+  }, [periods]);
 
   // 右侧作品的时间点不再在轴上显示，改由右侧 Sidebar 分组左上角显示标签
 

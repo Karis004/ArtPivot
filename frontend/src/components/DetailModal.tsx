@@ -15,11 +15,12 @@ interface Props {
   onUpdateArtwork?: (a: Artwork) => void;
   onUpdatePeriod?: (p: ArtPeriod) => void;
   onDeleteArtwork?: (id: string) => void;
+  onDeletePeriod?: (id: string) => void;
   startInEdit?: boolean;
   onStartEditConsumed?: () => void;
 }
 
-const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpdateArtwork, onUpdatePeriod, onDeleteArtwork, startInEdit, onStartEditConsumed }) => {
+const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpdateArtwork, onUpdatePeriod, onDeleteArtwork, onDeletePeriod, startInEdit, onStartEditConsumed }) => {
   const [editing, setEditing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ea, setEa] = useState<Artwork | null>(null);
@@ -139,6 +140,26 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
       const res = await axios.delete(`/api/artworks/${ea.id}`);
       if (res.data?.ok) {
         onDeleteArtwork && onDeleteArtwork(ea.id);
+        onClose();
+      } else {
+        alert('删除失败');
+      }
+    } catch (e: any) {
+      alert('删除失败：' + (e?.response?.data?.error || e?.message));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleDeletePeriod = async () => {
+    if (!ep) return;
+    const ok = window.confirm('确定要删除该流派吗？相关画作将不再关联该流派，但不会被删除。');
+    if (!ok) return;
+    try {
+      setBusy(true);
+      const res = await axios.delete(`/api/periods/${ep.id}`);
+      if (res.data?.ok) {
+        onDeletePeriod && onDeletePeriod(ep.id);
         onClose();
       } else {
         alert('删除失败');
@@ -459,6 +480,9 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
                   <button className="btn" onClick={() => setEditing(true)}>编辑</button>
                   {detail.type === 'artwork' && ea && (
                     <button className="btn btn-del" disabled={busy} onClick={handleDelete} style={{ color: '#b00020' }}>删除该画作</button>
+                  )}
+                  {detail.type === 'period' && detail.period && (
+                    <button className="btn btn-del" disabled={busy} onClick={handleDeletePeriod} style={{ color: '#b00020' }}>删除该流派</button>
                   )}
                 </>
               ) : (

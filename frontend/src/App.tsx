@@ -123,6 +123,18 @@ function App() {
             setPreviewMode('side-pane');
             consumeModalEntryMode();
           }}
+          onDeletePeriod={(id) => {
+            (async () => {
+              await axios.delete(`/api/periods/${id}`);
+              // 删除该流派本身
+              setPeriods(prev => prev.filter(x => x.id !== id));
+              // 关联到该流派的作品保持存在，但 periodId 置空
+              setArtworks(prev => prev.map(a => a.periodId === id ? { ...a, periodId: '' } : a));
+            })();
+            setDetail(undefined);
+            setPreviewMode('side-pane');
+            consumeModalEntryMode();
+          }}
         />
       </main>
     </div>
