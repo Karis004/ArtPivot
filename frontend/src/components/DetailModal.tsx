@@ -458,7 +458,7 @@ const DetailModal: React.FC<Props> = ({ open, detail, onClose, formatYear, onUpd
                 <>
                   <button className="btn" onClick={() => setEditing(true)}>编辑</button>
                   {detail.type === 'artwork' && ea && (
-                    <button className="btn" disabled={busy} onClick={handleDelete} style={{ color: '#b00020' }}>删除该画作</button>
+                    <button className="btn btn-del" disabled={busy} onClick={handleDelete} style={{ color: '#b00020' }}>删除该画作</button>
                   )}
                 </>
               ) : (

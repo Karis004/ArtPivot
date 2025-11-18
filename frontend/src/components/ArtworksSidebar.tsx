@@ -113,7 +113,7 @@ const ArtworkBucketRow: React.FC<RowProps> = ({ artworks, periods, formatYear, o
         {artworks.map((art) => {
           const period = periods.find((p) => p.id === art.periodId);
           return (
-            <div key={`artwork-card-${art.id}`} className="artwork-card-inline" title={`${formatYear(art.year)}`}>
+            <div key={`artwork-card-${art.id}`} className="artwork-card-inline">
               <div className={selectedArtworkId === art.id ? 'is-selected' : undefined}>
                 <ArtworkCard artwork={art} period={period} formatYear={formatYear} onClick={onSelectArtwork} />
               </div>
