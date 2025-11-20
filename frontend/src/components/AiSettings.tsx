@@ -8,8 +8,12 @@ const LS_NAME = 'ai.apiName';
 const LS_MODEL = 'ai.model';
 const LS_BASE_URL = 'ai.baseUrl';
 
-const AiSettings: React.FC = () => {
-  const [open, setOpen] = useState(false);
+interface Props {
+  open: boolean;
+  setOpen: (v: boolean) => void;
+}
+
+const AiSettings: React.FC<Props> = ({ open, setOpen }) => {
   const [apiKey, setApiKey] = useState('');
   const [apiName, setApiName] = useState('');
   const [model, setModel] = useState('');
@@ -102,10 +106,8 @@ const AiSettings: React.FC = () => {
   };
 
   return (
-    <div className="ai-settings">
-      <button className="btn" onClick={() => setOpen(true)}>
-        AI 设置{apiKey ? `（${apiName || '已配置'}）` : ''}
-      </button>
+    <div className="ai-settings-modal-container">
+      {/* Button moved to App header menu */}
 
       {open && (
         <div className="modal-overlay" onClick={() => setOpen(false)}>

@@ -20,6 +20,13 @@ function App() {
   const [modalEntryMode, setModalEntryMode] = useState<'view' | 'edit'>('view');
   const consumeModalEntryMode = useCallback(() => setModalEntryMode('view'), [setModalEntryMode]);
 
+  // Modal states
+  const [showAddArtwork, setShowAddArtwork] = useState(false);
+  const [showAddPeriod, setShowAddPeriod] = useState(false);
+  const [showAiImport, setShowAiImport] = useState(false);
+  const [showAiSettings, setShowAiSettings] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+
   // 仅为提供 formatYear 给弹窗使用（避免重复逻辑）
   const { formatYear } = useTimelinePosition(periods, artworks);
 
@@ -48,12 +55,33 @@ function App() {
       <header className="app-header">
         <h1>ArtPivot</h1>
         <div className="app-header-actions">
-          <AiSettings />
+          <div className="menu-container">
+            <button className="menu-btn" onClick={() => setShowMenu(!showMenu)}>
+              <div className="menu-icon-bar"></div>
+              <div className="menu-icon-bar"></div>
+              <div className="menu-icon-bar"></div>
+            </button>
+            {showMenu && (
+              <>
+                <div className="menu-backdrop" onClick={() => setShowMenu(false)}></div>
+                <div className="menu-dropdown">
+                  <div className="menu-item" onClick={() => { setShowAddArtwork(true); setShowMenu(false); }}>+ 添加 Artwork</div>
+                  <div className="menu-item" onClick={() => { setShowAddPeriod(true); setShowMenu(false); }}>+ 添加 Period</div>
+                  <div className="menu-item" onClick={() => { setShowAiImport(true); setShowMenu(false); }}>AI 读取</div>
+                  <div className="menu-divider"></div>
+                  <div className="menu-item" onClick={() => { setShowAiSettings(true); setShowMenu(false); }}>AI 设置</div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
       <main style={{ position: 'relative', paddingRight: previewMode === 'side-pane' && !!detail ? 412 : 0, transition: 'padding-right 220ms ease' }}>
         {loading && <div style={{ padding: 12, color: '#666' }}>加载中…</div>}
+        
+        <AiSettings open={showAiSettings} setOpen={setShowAiSettings} />
+        
         <AddControls
           periods={periods}
           onAddPeriod={async (p: ArtPeriod) => {
@@ -66,6 +94,12 @@ function App() {
             const na: Artwork = { id: String(res.data.item._id), title: res.data.item.title, artist: res.data.item.artist, year: res.data.item.year, imageUrl: res.data.item.imageUrl || '', description: res.data.item.description || '', periodId: res.data.item.periodId ? String(res.data.item.periodId) : '' };
             setArtworks(prev => [...prev, na]);
           }}
+          showPeriod={showAddPeriod}
+          setShowPeriod={setShowAddPeriod}
+          showArtwork={showAddArtwork}
+          setShowArtwork={setShowAddArtwork}
+          showAiImport={showAiImport}
+          setShowAiImport={setShowAiImport}
         />
         <div>
           <VerticalTimeline

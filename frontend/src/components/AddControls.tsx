@@ -7,22 +7,26 @@ interface Props {
   periods: ArtPeriod[];
   onAddPeriod: (p: ArtPeriod) => void;
   onAddArtwork: (a: Artwork) => void;
+  // Controlled state from parent
+  showPeriod: boolean;
+  setShowPeriod: (v: boolean) => void;
+  showArtwork: boolean;
+  setShowArtwork: (v: boolean) => void;
+  showAiImport: boolean;
+  setShowAiImport: (v: boolean) => void;
 }
 
-const AddControls: React.FC<Props> = ({ periods, onAddPeriod, onAddArtwork }) => {
-  const [showPeriod, setShowPeriod] = useState(false);
-  const [showArtwork, setShowArtwork] = useState(false);
-  const [showAiImport, setShowAiImport] = useState(false);
-
+const AddControls: React.FC<Props> = ({ 
+  periods, onAddPeriod, onAddArtwork,
+  showPeriod, setShowPeriod,
+  showArtwork, setShowArtwork,
+  showAiImport, setShowAiImport
+}) => {
   const periodOptions = useMemo(() => periods.map(p => ({ id: p.id, name: p.name })), [periods]);
 
   return (
-    <div className="add-controls">
-      <div className="add-toolbar">
-        <button className="btn" onClick={() => setShowArtwork(true)}>+ 添加 Artwork</button>
-        <button className="btn" onClick={() => setShowPeriod(true)}>+ 添加 Period</button>
-        <button className="btn" onClick={() => setShowAiImport(true)}>AI 读取</button>
-      </div>
+    <div className="add-controls-modals">
+      {/* Buttons moved to App header menu */}
 
       {showArtwork && (
         <ArtworkModal

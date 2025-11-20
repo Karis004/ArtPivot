@@ -28,6 +28,7 @@
     display: flex;
     justify-content: flex-start;
     padding-left: 60px;
+    padding-right: 30px;
     overflow: visible;
 }
 

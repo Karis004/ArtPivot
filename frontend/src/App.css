@@ -5,7 +5,7 @@
 body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: repeating-linear-gradient(-45deg, oklch(98% 0 0), oklch(98% 0 0) 13px, oklch(95% 0 0) 13px, oklch(95% 0 0) 14px);
+    background: repeating-linear-gradient(-45deg, #F4F4F0, #F4F4F0 13px, oklch(95% 0 0) 13px, oklch(95% 0 0) 14px);
 }
 
 .App {
@@ -21,18 +21,95 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    font-family: "Gloock", serif;
-    font-weight: 400;
 }
 
 .app-header h1 {
-    font-size: 1rem;
+    font-family: "Gloock", serif;
+    font-weight: 400;
+    font-size: 1.2rem;
     padding: 10px;
     margin: 0;
+    margin-left: 20px;
 }
 
 .app-header-actions { padding: 6px 10px; }
 
 main {
     overflow-x: auto;
+}
+
+/* Menu Styles */
+.menu-container {
+  position: relative;
+}
+
+.menu-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 40px;
+  height: 40px;
+  align-items: center;
+  transition: opacity 0.2s;
+}
+
+.menu-btn:hover {
+  opacity: 0.7;
+}
+
+.menu-icon-bar {
+  width: 15px;
+  height: 1.5px;
+  background-color: white;
+}
+
+.menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 99;
+  cursor: default;
+}
+
+.menu-dropdown {
+  position: absolute;
+  top: 140%;
+  right: 0;
+  background: white;
+  color: #333;
+  /* box-shadow: 0 0px 8px rgba(0,0,0,0.15); */
+  min-width: 160px;
+  z-index: 100;
+  text-align: left;
+  animation: fadeIn 0.2s ease-out;
+  border: 1px solid #ddd;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.menu-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.menu-item:hover {
+  background-color: #f5f5f5;
+}
+
+.menu-divider {
+  height: 1px;
+  background-color: #eee;
+  margin: 4px 0;
 }
